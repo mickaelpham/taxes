@@ -5,7 +5,7 @@ require 'optparse'
 
 options = {}
 
-OptionParser.new do |opts|
+parser = OptionParser.new do |opts|
   opts.banner = 'Usage: taxes [options]'
 
   opts.on(
@@ -28,11 +28,13 @@ OptionParser.new do |opts|
     'File to write the tax amount due for each income to') do |output|
     options[:output] = output
   end
-end.parse!
+end
+parser.parse!
 
 # Display usage if missing any of the arguments
-unless %i[brackets incomes output].all?
-  puts $!.to_s
+required = %i[brackets incomes output]
+unless required.all? { |name| options[name] }
+  puts parser
   exit 1
 end
 
@@ -44,6 +46,9 @@ incomes  = Taxes::Datasource.load_incomes(options[:incomes])
 engine = Taxes::Engine.new(brackets: brackets)
 
 # Gather taxes due
-taxes = incomes.each { |income| engine.taxes_due(income) }
+income_taxes = incomes.each { |income| engine.taxes_due(income) }
 
 # Write to the output
+File.open(options[:output], 'w+') do |file|
+  income_taxes.each { |income_tax| file.puts(income_tax) }
+end
