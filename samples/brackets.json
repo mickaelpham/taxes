@@ -1,0 +1,21 @@
+[
+  {
+    "lower_income_limit": 0,
+    "upper_income_limit": 10000,
+    "tax_rate": 0
+  },
+  {
+    "lower_income_limit": 10000,
+    "upper_income_limit": 20000,
+    "tax_rate": 0.10
+  },
+  {
+    "lower_income_limit": 20000,
+    "upper_income_limit": 50000,
+    "tax_rate": 0.20
+  },
+  {
+    "lower_income_limit": 50000,
+    "tax_rate": 0.30
+  }
+]

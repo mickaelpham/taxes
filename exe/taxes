@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 require 'taxes'
 require 'optparse'
@@ -11,21 +12,24 @@ parser = OptionParser.new do |opts|
   opts.on(
     '-b BRACKETS',
     '--brackets BRACKETS',
-    'JSON files containing with the tax brackets') do |brackets|
+    'JSON files containing with the tax brackets'
+  ) do |brackets|
     options[:brackets] = brackets
   end
 
   opts.on(
     '-i INCOMES',
     '--incomes INCOMES',
-    'Plain text file, one income per line') do |incomes|
+    'Plain text file, one income per line'
+  ) do |incomes|
     options[:incomes] = incomes
   end
 
   opts.on(
     '-o FILENAME',
     '--output FILENAME',
-    'File to write the tax amount due for each income to') do |output|
+    'File to write the tax amount due for each income to'
+  ) do |output|
     options[:output] = output
   end
 end
@@ -42,11 +46,12 @@ end
 brackets = Taxes::Datasource.load_tax_brackets(options[:brackets])
 incomes  = Taxes::Datasource.load_incomes(options[:incomes])
 
-# Create a tax engine
-engine = Taxes::Engine.new(brackets: brackets)
+# Create a tax engine from the brackets
+brackets = brackets.map { |bracket| Taxes::Bracket.new(bracket) }
+engine   = Taxes::Engine.new(brackets: brackets)
 
 # Gather taxes due
-income_taxes = incomes.each { |income| engine.taxes_due(income) }
+income_taxes = incomes.map { |income| engine.taxes_due(income) }
 
 # Write to the output
 File.open(options[:output], 'w+') do |file|
