@@ -12,8 +12,9 @@ module Taxes
     def taxes_due(income)
       brackets
         .select { |bracket| bracket.include?(income) }
-        .map    { |included_bracket| included_bracket.taxes_due(income) }
+        .map    { |included_bracket| included_bracket.amount_due(income) }
         .reduce(:+)
+        .round(2) # NOTE: assuming USD is used as the currency here
     end
   end
 end
