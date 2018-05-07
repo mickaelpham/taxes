@@ -7,8 +7,8 @@ module Taxes
     # Generic bracket error
     class Error < StandardError; end
 
-    # When the upper income limit is not defined
-    class NoUpperIncomeLimit < Error; end
+    # When calling #amount_due for an incorrect income
+    class IncorrectBracket < Error; end
 
     attr_reader :lower_income_limit,
                 :upper_income_limit,
@@ -20,8 +20,33 @@ module Taxes
       @tax_rate           = params.fetch(:tax_rate)
     end
 
+    def amount_due(income)
+      raise IncorrectBracket unless include?(income)
+
+      if nominal?(income)
+        (income - lower_income_limit) * tax_rate
+      else
+        max_amount_due
+      end
+    end
+
+    def nominal?(income)
+      if upper_income_limit
+        income.between?(lower_income_limit, upper_income_limit)
+      else
+        income >= lower_income_limit
+      end
+    end
+
+    def include?(income)
+      income >= lower_income_limit
+    end
+
+    private
+
+    # NOTE: We memoize the calculated amount here since the tax brackets can be
+    #       reused to calculate the total tax amount due for different income.
     def max_amount_due
-      raise NoUpperIncomeLimit unless upper_income_limit
       @max_amount_due ||= (upper_income_limit - lower_income_limit) * tax_rate
     end
   end
